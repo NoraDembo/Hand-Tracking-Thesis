@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
+    path: Assets/Scenes/HandTrackingInteraction.unity
+    guid: f51ceabcc4a87334ab5adf469b974057
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 3cafe11751faddb4f8e0fb643d3f37d7, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 8d12a19da7a415544b451c910e0442b5, type: 2}
