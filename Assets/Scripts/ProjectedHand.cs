@@ -5,42 +5,71 @@ using UnityEngine;
 
 public class ProjectedHand : MonoBehaviour
 {
-    public float minGrabDistance = 0.25f;
-    public float maxGrabDistance = 0.5f;
-    public float projectionRange = 5;
+    public Transform projectedPosition;
 
-    public float exponent = 2;
+    [SerializeField] bool debugMode = false;
 
-    // the RayInteractor this hand projection gets its direction from
-    public RayInteractor rayInteractor;
+    [SerializeField] Vector3 maxInterpolation = Vector3.zero;
+    [SerializeField] float minGrabDistance = 0.25f;
+    [SerializeField] float maxGrabDistance = 0.5f;
+    [SerializeField] float projectionRange = 5;
 
-    // the position that is used to calculate the hands distance from the body. Should be approximately inside the users chest.
-    public Transform heart;
+    [SerializeField] float exponent = 2;
 
-    Transform sphere;
-    LineRenderer laser;
+    // the RayInteractor that provideds position and direction
+    [SerializeField] RayInteractor rayInteractor;
+
+    MeshRenderer debugSphere;
+    LineRenderer[] debugLines;
 
     // Start is called before the first frame update
     void Start()
     {
-        sphere = transform.GetChild(0);
-        laser = GetComponentInChildren<LineRenderer>();
+        debugSphere = GetComponentInChildren<MeshRenderer>();
+        debugSphere.enabled = debugMode;
+
+        debugLines = GetComponentsInChildren<LineRenderer>();
+
+        foreach(LineRenderer line in debugLines)
+        {
+            line.enabled = debugMode;
+        }
     }
+
 
     // Update is called once per frame
     void Update()
     {
-        // TODO calculate distance
-        float distanceFromHeart = (transform.position-heart.position).magnitude;
-        float projectionFactor = Mathf.Pow(Mathf.Clamp01((distanceFromHeart - minGrabDistance) / (maxGrabDistance - minGrabDistance)), exponent);
+        // follow the position of the RayInteractor origin
+        Ray handRay = rayInteractor.Ray;
+        transform.position = handRay.origin;
 
-        float projectedDistance = projectionFactor * projectionRange;
+        // calculate projection distance
+        // TODO: improve this?
+        float horizontalDistance = new Vector3(transform.position.x-transform.parent.position.x, 0, transform.position.z - transform.parent.position.z).magnitude; // local position does not work because of possible head tilt
+        float linearProjectionFactor = Mathf.Clamp01((horizontalDistance - minGrabDistance) / (maxGrabDistance - minGrabDistance));
+        float quadraticProjectionFactor = Mathf.Pow(linearProjectionFactor, 2);
+        float projectedDistance = quadraticProjectionFactor * projectionRange;
 
-        Vector3 projectedPosition = transform.position + rayInteractor.Ray.direction * projectedDistance;
+        // Interpolate direction between handRay and direction from eye through the hand based on projection distance
+        Vector3 eyeDirection = (handRay.origin - transform.parent.position).normalized;
+        float interpolatedX = Mathf.Lerp(handRay.direction.x, eyeDirection.x, maxInterpolation.x * linearProjectionFactor);
+        float interpolatedY = Mathf.Lerp(handRay.direction.y, eyeDirection.y, maxInterpolation.y * linearProjectionFactor);
+        float interpolatedZ = Mathf.Lerp(handRay.direction.z, eyeDirection.z, maxInterpolation.z * linearProjectionFactor);
+        Vector3 interpolatedDirection = new Vector3(interpolatedX, interpolatedY, interpolatedZ);
+        transform.rotation = Quaternion.LookRotation(interpolatedDirection);
 
-        sphere.position = projectedPosition;
-        sphere.localScale = Vector3.one * projectionFactor;
-        laser.SetPositions( new Vector3[] { Vector3.zero, transform.InverseTransformPoint(projectedPosition) });
+        // update projected position
+        projectedPosition.localPosition = Vector3.forward * projectedDistance;
+        projectedPosition.localScale = Vector3.one * quadraticProjectionFactor;
+
+        if (debugMode)
+        {
+            debugLines[0].SetPositions(new Vector3[] { Vector3.zero, Vector3.forward * projectedDistance });
+            debugLines[1].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformDirection(eyeDirection) * projectedDistance });
+            debugLines[2].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformDirection(handRay.direction) * projectedDistance });
+        }
+        
 
     }
 }
