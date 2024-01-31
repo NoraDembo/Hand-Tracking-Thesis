@@ -33,11 +33,11 @@ public class InteractableShape : MonoBehaviour
 
         if (clicking)
         {
-            grab.Play();
+            //grab.Play();
         }
         else
         {
-            release.Play();
+            //release.Play();
         }
     }
 }

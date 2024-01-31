@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5463669077671431456}
   - component: {fileID: 6217712900433669218}
   m_Layer: 0
-  m_Name: Window
+  m_Name: ShapesWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -89,7 +89,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.2, y: 0.8, z: 0}
+  m_Size: {x: 0.4, y: 0.3, z: 0}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6217712900433669218
 MonoBehaviour:
@@ -332,7 +332,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _position: {x: 0, y: 0, z: 0}
-  _size: {x: 1.2, y: 0.8, z: 0}
+  _size: {x: 0.4, y: 0.3, z: 0}
 --- !u!1 &5193747422513665233
 GameObject:
   m_ObjectHideFlags: 0
@@ -821,7 +821,7 @@ MonoBehaviour:
   _data: {fileID: 0}
   _pointableElement: {fileID: 3933565490997450477}
   _surface: {fileID: 150498336851080790}
-  _selectSurface: {fileID: 0}
+  _selectSurface: {fileID: 7795560517154687620}
   _movementProvider: {fileID: 0}
   _tiebreakerScore: 0
 --- !u!114 &3124828249509230539
