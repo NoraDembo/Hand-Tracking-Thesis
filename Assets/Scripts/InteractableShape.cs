@@ -5,7 +5,8 @@ using UnityEngine;
 public class InteractableShape : MonoBehaviour
 {
 
-    public AudioSource grab, release;
+    [SerializeField] AudioSource grab, release;
+
     Animator animator;
 
     // Start is called before the first frame update

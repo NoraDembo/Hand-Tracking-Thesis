@@ -24,7 +24,7 @@ public class ColliderResizer : MonoBehaviour
     void Update()
     {
         // resize collider according to canvas size
-        Vector3 boundingBoxSize = new Vector3(canvasRect.sizeDelta.x, canvasRect.sizeDelta.y, padding) / 1000;
+        Vector3 boundingBoxSize = new Vector3(canvasRect.sizeDelta.x * canvasRect.localScale.x, canvasRect.sizeDelta.y * canvasRect.localScale.y, padding * canvasRect.localScale.z);
         surfaceBounds.Size = boundingBoxSize;
         box.size = boundingBoxSize;
     }
