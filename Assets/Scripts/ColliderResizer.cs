@@ -6,17 +6,15 @@ using UnityEngine;
 public class ColliderResizer : MonoBehaviour
 {
 
-    [SerializeField] float padding = 500;
-
     BoundsClipper surfaceBounds;
-    BoxCollider box;
+    BoxCollider collisionBox;
     RectTransform canvasRect;
 
     // Start is called before the first frame update
     void Start()
     {
         surfaceBounds = GetComponentInChildren<BoundsClipper>();
-        box = GetComponent<BoxCollider>();
+        collisionBox = GetComponent<BoxCollider>();
         canvasRect = GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
     }
 
@@ -24,8 +22,8 @@ public class ColliderResizer : MonoBehaviour
     void Update()
     {
         // resize collider according to canvas size
-        Vector3 boundingBoxSize = new Vector3(canvasRect.sizeDelta.x * canvasRect.localScale.x, canvasRect.sizeDelta.y * canvasRect.localScale.y, padding * canvasRect.localScale.z);
+        Vector3 boundingBoxSize = new Vector3(canvasRect.sizeDelta.x * canvasRect.localScale.x, canvasRect.sizeDelta.y * canvasRect.localScale.y, 1 * canvasRect.localScale.z);
         surfaceBounds.Size = boundingBoxSize;
-        box.size = boundingBoxSize;
+        collisionBox.size = boundingBoxSize;
     }
 }

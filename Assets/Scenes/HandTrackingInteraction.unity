@@ -974,10 +974,6 @@ PrefabInstance:
       propertyPath: rayInteractor
       value: 
       objectReference: {fileID: 669137101}
-    - target: {fileID: 5486469185574936138, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
-      propertyPath: maxInterpolation.y
-      value: 0.7
-      objectReference: {fileID: 0}
     - target: {fileID: 7866460850051669435, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0

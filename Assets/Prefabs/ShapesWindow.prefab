@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5504558548710063883}
-  - component: {fileID: 797338829394549693}
+  - component: {fileID: 8457400809902287484}
   - component: {fileID: 4021191822426984189}
   - component: {fileID: 5463669077671431456}
   - component: {fileID: 6217712900433669218}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ShapesWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37,7 +37,7 @@ Transform:
   - {fileID: 6809664395481672574}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &797338829394549693
+--- !u!114 &8457400809902287484
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -46,9 +46,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 913392797262362519}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68d1d5f7108d0334698ba8d19fc21ab6, type: 3}
+  m_Script: {fileID: 11500000, guid: a87564d1c78344c428ee5e307b0d984f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Targeted: 0
+  title: {fileID: 8010747157394280624}
 --- !u!95 &4021191822426984189
 Animator:
   serializedVersion: 5
@@ -103,7 +105,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ed141d747a9e094e93f1b65e704195a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  padding: 200
 --- !u!1 &3843387058154353311
 GameObject:
   m_ObjectHideFlags: 0
@@ -268,7 +269,7 @@ GameObject:
   - component: {fileID: 7795560517154687620}
   - component: {fileID: 150498336851080790}
   - component: {fileID: 140378959585807386}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Surface
   m_TagString: Untagged
   m_Icon: {fileID: 0}

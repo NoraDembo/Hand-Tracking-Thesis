@@ -1784,11 +1784,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7255122244928890958}
-  - component: {fileID: 1559591497551924400}
+  - component: {fileID: 1242126668211398318}
   - component: {fileID: 2883908945690945982}
   - component: {fileID: 2570542657559889636}
   - component: {fileID: 8811257506941092331}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: WordsWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1812,7 +1812,7 @@ Transform:
   - {fileID: 7153501596300222280}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1559591497551924400
+--- !u!114 &1242126668211398318
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1821,9 +1821,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8741483713191849084}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68d1d5f7108d0334698ba8d19fc21ab6, type: 3}
+  m_Script: {fileID: 11500000, guid: a87564d1c78344c428ee5e307b0d984f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Targeted: 0
+  title: {fileID: 160333219058615629}
 --- !u!95 &2883908945690945982
 Animator:
   serializedVersion: 5
@@ -1878,7 +1880,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ed141d747a9e094e93f1b65e704195a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  padding: 200
 --- !u!1 &9037673036726670673
 GameObject:
   m_ObjectHideFlags: 0
@@ -1891,7 +1892,7 @@ GameObject:
   - component: {fileID: 2265162565472183675}
   - component: {fileID: 5639777823721932032}
   - component: {fileID: 2833698277612959933}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Surface
   m_TagString: Untagged
   m_Icon: {fileID: 0}
