@@ -407,6 +407,11 @@ PrefabInstance:
       addedObject: {fileID: 1114689365}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea16c3c8c1688234fa81a4f39339bf1b, type: 3}
+--- !u!4 &194543852 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8030197382972942298, guid: d27ac1ffd4cdd7c40a39dcfa6012355c, type: 3}
+  m_PrefabInstance: {fileID: 1058522776}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &200539846 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4453513310108136, guid: 835e735ca71bf78459fb2cababd74112, type: 3}
@@ -781,6 +786,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4733c5f009d26ad49b3685117b8d3eb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &898746704 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8030197382972942298, guid: d27ac1ffd4cdd7c40a39dcfa6012355c, type: 3}
+  m_PrefabInstance: {fileID: 1264129535}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1058522776
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -817,6 +827,10 @@ PrefabInstance:
       propertyPath: _hand
       value: 
       objectReference: {fileID: 1583981764}
+    - target: {fileID: 4464419641693729567, guid: d27ac1ffd4cdd7c40a39dcfa6012355c, type: 3}
+      propertyPath: _rayOrigin
+      value: 
+      objectReference: {fileID: 1141158316}
     - target: {fileID: 7255044236378950226, guid: d27ac1ffd4cdd7c40a39dcfa6012355c, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -953,6 +967,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5486469185574936138, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      propertyPath: pointerPose
+      value: 
+      objectReference: {fileID: 194543852}
+    - target: {fileID: 5486469185574936138, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       propertyPath: rayInteractor
       value: 
       objectReference: {fileID: 669137101}
@@ -1049,6 +1067,10 @@ PrefabInstance:
       propertyPath: _hand
       value: 
       objectReference: {fileID: 260717247}
+    - target: {fileID: 4464419641693729567, guid: d27ac1ffd4cdd7c40a39dcfa6012355c, type: 3}
+      propertyPath: _rayOrigin
+      value: 
+      objectReference: {fileID: 2075108068}
     - target: {fileID: 7255044236378950226, guid: d27ac1ffd4cdd7c40a39dcfa6012355c, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -1357,6 +1379,10 @@ PrefabInstance:
       propertyPath: debugMode
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5486469185574936138, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      propertyPath: pointerPose
+      value: 
+      objectReference: {fileID: 898746704}
     - target: {fileID: 5486469185574936138, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       propertyPath: rayInteractor
       value: 
