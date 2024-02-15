@@ -823,6 +823,7 @@ GameObject:
   - component: {fileID: 8132967509425119733}
   - component: {fileID: 5730081265735665687}
   - component: {fileID: 5387276540046819228}
+  - component: {fileID: 7675424836760235574}
   m_Layer: 5
   m_Name: Frame
   m_TagString: Untagged
@@ -889,6 +890,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &7675424836760235574
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5395741421907520630}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5697050027469665636
 GameObject:
   m_ObjectHideFlags: 0
@@ -1804,7 +1817,7 @@ Transform:
   m_GameObject: {fileID: 8741483713191849084}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0.767}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1824,8 +1837,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a87564d1c78344c428ee5e307b0d984f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Targeted: 0
-  title: {fileID: 160333219058615629}
 --- !u!95 &2883908945690945982
 Animator:
   serializedVersion: 5
