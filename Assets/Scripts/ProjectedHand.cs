@@ -1,3 +1,4 @@
+using Oculus.Interaction;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,8 +27,10 @@ public class ProjectedHand : MonoBehaviour
     [Tooltip("Maximum distance the pojected position can reach (if the physical hand is at maxGrabDistance, the projected position will be this much further)")]
     [SerializeField] float projectionRange = 5;
 
-    [Tooltip("The transform that the Meta Ray Interaction bases its ray on")]
-    [SerializeField] Transform pointerPose;
+    [Tooltip("The RayInteractor used for 'pinch' interactions as well as for caulculating direction")]
+    [SerializeField] RayInteractor rayInteractor;
+    // the PointerPose calculates the ray origin and direction for the interactor
+    Transform pointerPose;
 
     [Tooltip("The layer mask used for ray collisions")]
     [SerializeField] LayerMask layerMask;
@@ -36,50 +39,66 @@ public class ProjectedHand : MonoBehaviour
     Vector3 projectedPosition;
 
     // for visualization of rays
-    LineRenderer debugLine;
+    LineRenderer[] debugLines;
 
     // Start is called before the first frame update
     void Start()
     {
+        // get reference to pointer pose
+        pointerPose = rayInteractor.GetComponentInChildren<HandPointerPose>().transform;
+
         // (de)activate debug display
-        debugLine = GetComponentInChildren<LineRenderer>();
-        debugLine.enabled = debugMode;
+        debugLines = GetComponentsInChildren<LineRenderer>();
+        foreach(LineRenderer line in debugLines)
+        {
+            line.enabled = debugMode;
+        }
     }
 
 
     // Update is called once per frame
     void Update()
     {
-
-        // follow the position of the RayInteractor origin
-        transform.position = pointerPose.position;
-
-        // calculate projection values based on hand distance from the body
-        // TODO: improve this?
-        float horizontalDistance = new Vector3(transform.position.x-transform.parent.position.x, 0, transform.position.z - transform.parent.position.z).magnitude; // local position does not work because of possible head tilt
-        float linearProjectionFactor = Mathf.Clamp01((horizontalDistance - minGrabDistance) / (maxGrabDistance - minGrabDistance));
-        float quadraticProjectionFactor = Mathf.Pow(linearProjectionFactor, 2);
-
-        // direction from center eye anchor through the hand ray origin
-        Vector3 eyeDirection = (transform.position - transform.parent.position).normalized;
-
-        // Interpolate between interactor direction and eye direction based on projection distance
-        float interpolatedX = Mathf.Lerp(pointerPose.forward.x, eyeDirection.x, maxInterpolation.x * linearProjectionFactor);
-        float interpolatedY = Mathf.Lerp(pointerPose.forward.y, eyeDirection.y, maxInterpolation.y * linearProjectionFactor);
-        float interpolatedZ = Mathf.Lerp(pointerPose.forward.z, eyeDirection.z, maxInterpolation.z * linearProjectionFactor);
-        Vector3 interpolatedDirection = new Vector3(interpolatedX, interpolatedY, interpolatedZ).normalized;
-
-        // rotate to that direction
-        transform.rotation = Quaternion.LookRotation(interpolatedDirection);
-
-        // update projected hand position
-        projectedPosition = transform.position + transform.forward * projectionRange * quadraticProjectionFactor;
+        // Update positions
+        UpdatePosition();
 
         // select target window
         SelectWindow();
 
+        // TODO: what to do with the selected window based on hand state?
+
         // draw debug lines
         if (debugMode) DrawDebugLines();
+    }
+
+    void UpdatePosition()
+    {
+        // follow the position of the RayInteractor origin
+        transform.position = pointerPose.position;
+
+        // calculate projection values based on hand distance from the body
+        // (TODO: improve this?)
+        float horizontalDistance = new Vector3(transform.position.x - transform.parent.position.x, 0, transform.position.z - transform.parent.position.z).magnitude; // local position does not work because of possible head tilt
+        float linearProjectionFactor = Mathf.Clamp01((horizontalDistance - minGrabDistance) / (maxGrabDistance - minGrabDistance));
+        float quadraticProjectionFactor = Mathf.Pow(linearProjectionFactor, 2);
+
+        // direction from center eye anchor through the hand ray origin (in local space)
+        Vector3 eyeDirection = transform.InverseTransformDirection((transform.position - transform.parent.position).normalized);
+        // Interactor ray direction (in local space)
+        Vector3 rayDirection = transform.InverseTransformDirection(pointerPose.forward);
+
+        // Interpolate between interactor direction and eye direction based on projection distance
+        float interpolatedX = Mathf.Lerp(rayDirection.x, eyeDirection.x, maxInterpolation.x * linearProjectionFactor);
+        float interpolatedY = Mathf.Lerp(rayDirection.y, eyeDirection.y, maxInterpolation.y * linearProjectionFactor);
+        float interpolatedZ = Mathf.Lerp(rayDirection.z, eyeDirection.z, maxInterpolation.z * linearProjectionFactor);
+        Vector3 interpolatedDirection = new Vector3(interpolatedX, interpolatedY, interpolatedZ).normalized;
+
+        // rotate to that direction
+        Vector3 globalDirection = transform.TransformDirection(interpolatedDirection);
+        transform.rotation = Quaternion.LookRotation(globalDirection);
+
+        // update projected hand position
+        projectedPosition = transform.position + projectionRange * quadraticProjectionFactor * transform.forward;
     }
 
     void SelectWindow()
@@ -126,7 +145,8 @@ public class ProjectedHand : MonoBehaviour
 
     public void DrawDebugLines()
     {
-        debugLine.SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformPoint(projectedPosition) });
+        debugLines[0].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformPoint(projectedPosition) });
+        debugLines[1].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformDirection(pointerPose.forward * projectionRange) });
     }
 
 }
