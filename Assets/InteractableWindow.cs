@@ -21,4 +21,14 @@ public class InteractableWindow : MonoBehaviour
         animator.SetBool("Targeted", Targeted > 0);
     }
 
+    public void PickUp(Transform grabbingPoint)
+    {
+        transform.parent = grabbingPoint;
+    }
+
+    public void Release()
+    {
+        transform.parent = null;
+    }
+
 }

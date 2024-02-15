@@ -1,10 +1,13 @@
 using Oculus.Interaction;
+using Oculus.Interaction.GrabAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ProjectedHand : MonoBehaviour
 {
+    [Tooltip("The target position of the hand projection")]
+    public Transform projectedPosition;
 
     [Tooltip("The window that is being targeted by this hand")]
     public InteractableWindow TargetWindow { get; private set; }
@@ -32,11 +35,11 @@ public class ProjectedHand : MonoBehaviour
     // the PointerPose calculates the ray origin and direction for the interactor
     Transform pointerPose;
 
+    [Tooltip("Hand grab API to determine hand states.")]
+    [SerializeField] HandGrabAPI grabAPI;
+
     [Tooltip("The layer mask used for ray collisions")]
     [SerializeField] LayerMask layerMask;
-
-    // the target position of the hand projection
-    Vector3 projectedPosition;
 
     // for visualization of rays
     LineRenderer[] debugLines;
@@ -62,11 +65,24 @@ public class ProjectedHand : MonoBehaviour
         // Update positions
         UpdatePosition();
 
-        // select target window
-        SelectWindow();
+        if (!grabAPI.IsHandPalmGrabbing(GrabbingRule.DefaultPalmRule))
+        {
+            // if the hand is open, release held windows (if any)
+            if (TargetWindow != null) TargetWindow.Release();
 
-        // TODO: what to do with the selected window based on hand state?
+            // select the best suitable window based on hand projection
+            UpdateTargetWindow();
 
+        }else if(TargetWindow != null)
+        {
+            // this case only happens when we closed our fist while hovering over a suitable candidate (or we are already holding something)
+            // otherwise, the target would have been set to null in the previous frame
+            // this prevents picking up targets while passing through them with a closed fist
+            TargetWindow.PickUp(projectedPosition);
+        }
+        
+
+        
         // draw debug lines
         if (debugMode) DrawDebugLines();
     }
@@ -98,10 +114,12 @@ public class ProjectedHand : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(globalDirection);
 
         // update projected hand position
-        projectedPosition = transform.position + projectionRange * quadraticProjectionFactor * transform.forward;
+        projectedPosition.localPosition = Vector3.forward * projectionRange * quadraticProjectionFactor;
     }
 
-    void SelectWindow()
+
+    // selects the best suitable target window based on hand projection
+    void UpdateTargetWindow()
     {
         RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, projectionRange + 1, layerMask);
         if(hits.Length > 0)
@@ -111,7 +129,7 @@ public class ProjectedHand : MonoBehaviour
             float closestDistance = Mathf.Infinity;
             foreach (RaycastHit hit in hits)
             {
-                float distance = (hit.point - projectedPosition).magnitude;
+                float distance = (hit.point - projectedPosition.position).magnitude;
                 if(distance < minSelectionDistance && distance < closestDistance)
                 {
                     bestCandidate = hit.collider.GetComponent<InteractableWindow>();
@@ -145,7 +163,23 @@ public class ProjectedHand : MonoBehaviour
 
     public void DrawDebugLines()
     {
-        debugLines[0].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformPoint(projectedPosition) });
+        if (grabAPI.IsHandPalmGrabbing(GrabbingRule.DefaultPalmRule))
+        {
+            debugLines[0].startColor = new Color(0, 1, 0, 0);
+            debugLines[0].endColor = Color.green;
+        }
+        else if(grabAPI.IsHandPinchGrabbing(GrabbingRule.DefaultPinchRule))
+        {
+            debugLines[0].startColor = new Color(1, 1, 0, 0);
+            debugLines[0].endColor = Color.yellow;
+        }
+        else
+        {
+            debugLines[0].startColor = new Color(1, 0, 0, 0);
+            debugLines[0].endColor = Color.red;
+        }
+
+        debugLines[0].SetPositions(new Vector3[] { Vector3.zero, projectedPosition.localPosition });
         debugLines[1].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformDirection(pointerPose.forward * projectionRange) });
     }
 
