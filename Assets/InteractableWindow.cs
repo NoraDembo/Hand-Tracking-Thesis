@@ -1,3 +1,4 @@
+using Oculus.Interaction;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,8 +8,12 @@ public class InteractableWindow : MonoBehaviour
     // how many hands are targeting this
     public bool Targeted { get; set; }
     public bool Faded { get; set; }
+    public bool Hidden { get; set; }
 
     Animator animator;
+    CanvasGroup canvasGroup;
+    RayInteractable rayInteractable;
+    PointableCanvas pointableCanvas;
 
     bool grabbed = false;
 
@@ -16,6 +21,9 @@ public class InteractableWindow : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+        canvasGroup = GetComponentInChildren<CanvasGroup>();
+        rayInteractable = GetComponentInChildren<RayInteractable>();
+        pointableCanvas = GetComponentInChildren<PointableCanvas>();
     }
 
     // LateUpdate so the hand interactors are done calculating their targets
@@ -24,10 +32,19 @@ public class InteractableWindow : MonoBehaviour
 
         animator.SetBool("Targeted", Targeted);
         animator.SetBool("Faded", Faded);
+        animator.SetBool("Hidden", Hidden);
+        animator.SetBool("Grabbed", grabbed);
 
-        // reset window states (they will be reapplied in the projectedHands Update() if applicable)
+        // disable window interactability when either faded or hidden
+        canvasGroup.interactable = !(Faded || Hidden);
+        canvasGroup.blocksRaycasts = !(Faded || Hidden);
+        rayInteractable.enabled = !(Faded || Hidden);
+        pointableCanvas.enabled = !(Faded || Hidden);
+
+        // reset window states (they will be reapplied in the projectedHands Update() if appliccable)
         Targeted = false;
         Faded = false;
+        Hidden = false;
     }
 
     public void Hold(Transform grabbingPoint)

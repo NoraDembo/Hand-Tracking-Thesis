@@ -3,20 +3,23 @@ using Oculus.Interaction.GrabAPI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using System;
 
 public class ProjectedHand : MonoBehaviour
 {
-    [Tooltip("The target position of the hand projection")]
-    public Transform projectedPosition;
+    enum HandState
+    {
+        Open,       // Hand is completely open (target entire windows)
+        Grabbing,   // Hand does a closed grab (interact with entire windows)
+        Pointing,   // Hand is in preparing a pinch (target within windows)
+        Pinching    // Hand does a closed pinch (interact within windows)
+    }
 
-    [Tooltip("The minimum distance from the projected position where a window will be considered for targeting")]
-    [SerializeField] float maxSelectionDistance = 1;
+    
 
     [Tooltip("Display visualizations of rays and target collider")]
     [SerializeField] bool debugMode = false;
-
-    [Tooltip("Maximum interpolation weights for each xyz component beween eye direction vector and Meta interaction ray")]
-    [SerializeField] Vector3 maxInterpolation = Vector3.zero;
 
     [Tooltip("Distance (from body to hand) at which hand position starts to be projected outwards")]
     [SerializeField] float minGrabDistance = 0.25f;
@@ -27,10 +30,26 @@ public class ProjectedHand : MonoBehaviour
     [Tooltip("Maximum distance the pojected position can reach (if the physical hand is at maxGrabDistance, the projected position will be this much further)")]
     [SerializeField] float projectionRange = 5;
 
-    [Tooltip("The RayInteractor used for 'pinch' interactions as well as for caulculating direction")]
+    [Tooltip("The minimum distance from the projected position where a window will be considered for targeting")]
+    [SerializeField] float maxSelectionDistance = 1;
+
+    [Tooltip("The RayInteractor used for 'pinch' interactions as well as for calculating direction")]
     [SerializeField] RayInteractor rayInteractor;
+
     // the PointerPose calculates the ray origin and direction for the interactor
     Transform pointerPose;
+    Transform rayInteractorVisuals;
+
+    [Tooltip("Maximum interpolation weights for each xyz component beween eye direction vector and Meta interaction ray")]
+    [SerializeField] Vector3 maxInterpolation = Vector3.zero;
+
+    [Tooltip("GrabScore to consider the hand grabbing")]
+    [SerializeField] float grabThreshold;
+
+    [Tooltip("PinchScore to consider the hand pointing")]
+    [SerializeField] float pointThreshold;
+
+    
 
     [Tooltip("Hand grab API to determine hand states.")]
     [SerializeField] HandGrabAPI grabAPI;
@@ -38,65 +57,117 @@ public class ProjectedHand : MonoBehaviour
     [Tooltip("The layer mask used for ray collisions")]
     [SerializeField] LayerMask layerMask;
 
+    HandState handState = HandState.Open;
+
+    // the target position of the hand projection
+    [SerializeField] Transform projectedPosition;
+
+    // the windows that are targeted or held by this projected hand
     InteractableWindow hoverTarget;
     InteractableWindow heldWindow;
 
+    // the last known distance to a hover target
+    float targetDistance = 0;
 
-    // for visualization of rays
+    // for visualization of rays and hand states
     LineRenderer[] debugLines;
+    TextMeshPro[] debugText;
+
+    
+
 
     // Start is called before the first frame update
     void Start()
     {
-        // get reference to pointer pose
+        // get reference to pointer pose and interactor visuals
         pointerPose = rayInteractor.GetComponentInChildren<HandPointerPose>().transform;
+        rayInteractorVisuals = rayInteractor.transform.GetChild(2);
 
-        // (de)activate debug display
+        // get reference to debug displays
         debugLines = GetComponentsInChildren<LineRenderer>();
-        foreach(LineRenderer line in debugLines)
-        {
-            line.enabled = debugMode;
-        }
+        debugText = GetComponentsInChildren<TextMeshPro>();
+        
     }
+
+
+
 
 
     // Update is called once per frame
     void Update()
     {
+        //show (or hide) debug displays
+        ToggleDebugDisplay(debugMode);
+
         // follow the position of the RayInteractor origin
         transform.position = pointerPose.position;
 
+        // Get hand projection based on distance from body
         float projectionStrength = ProjectHand();
+
+        // Get Hand state (Open, Grabbing, Pointing or Pinching)
+        handState = GetHandState();
 
         // get Raycast targets
         RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, projectionRange + 1, layerMask);
 
-        if (!grabAPI.IsHandPalmGrabbing(GrabbingRule.DefaultPalmRule))
+        switch (handState)
         {
-            // if the hand is open, release any held windows
-            if (heldWindow != null)
-            {
-                heldWindow.Release();
-                heldWindow = null;
-            }
+            case HandState.Open:
 
-            // set the best suitable window as target
-            hoverTarget = GetTargetWindow(hits, projectionStrength);
+                // release any held windows
+                ReleaseWindow();
 
-        }else if(hoverTarget != null)
-        {
-            // this case only happens when we closed our fist while hovering over a suitable candidate (or we are already holding something)
-            // otherwise, the target would have been set to null in the previous frame (this prevents picking up targets while passing through them with a closed fist)
-            heldWindow = hoverTarget;
-            heldWindow.Hold(projectedPosition);
+                // disable ray interaction
+                ToggleRayInteraction(false);
+
+                // set the best suitable window as target
+                hoverTarget = GetTargetWindow(hits, projectionStrength);
+                break;
+
+            case HandState.Grabbing:
+
+                // if there is a Hover Target, pick it up
+                // notably, this state does not look for new targets, so we won't accidentally pick things up when passing through them with a closed hand
+                if(hoverTarget != null)
+                {
+                    heldWindow = hoverTarget;
+                    heldWindow.Hold(projectedPosition);
+                }
+                break;
+
+            case HandState.Pointing:
+
+                // release any held windows
+                ReleaseWindow();
+
+                // enable ray interaction
+                ToggleRayInteraction(true);
+
+                // select target window for interaction
+                hoverTarget = GetTargetWindow(hits, projectionStrength);
+                break;
+
+            case HandState.Pinching:
+                
+                // nothing to do?
+                // we should always pass through the "pointing" state before we get here, so the RayInteractor should already be enabled.
+                // not enabling it here again may prevent accidental shifts from grabbing directly to pinching
+                // we shouldn't be looking for new target windows either, to prevent switching windows during an interaction
+                break;
+
         }
 
-        // fade untargeted windows in front of the target
-        FadeWindows(hits);
+        // highlight the hover target
+        if(hoverTarget != null) hoverTarget.Targeted = true;
+
+        // fade untargeted windows in front of the hiver target
+        FadeWindows(hits, handState);
         
-        // draw debug lines
-        if (debugMode) DrawDebugLines();
     }
+
+
+
 
 
     float ProjectHand()
@@ -126,16 +197,72 @@ public class ProjectedHand : MonoBehaviour
         // update projected hand position
         projectedPosition.localPosition = Vector3.forward * projectionRange * quadraticProjectionFactor;
 
+        // Update Ray visualizations
+        if (debugMode)
+        {
+            debugLines[0].SetPositions(new Vector3[] { Vector3.zero, projectedPosition.localPosition });
+            //debugLines[1].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformDirection(pointerPose.forward * projectionRange) });
+        }
+
+
         // return current projection strength
         return quadraticProjectionFactor;
     }
+
+
+
+
+
+    HandState GetHandState()
+    {
+
+        float grabScore = grabAPI.GetHandPalmScore(GrabbingRule.FullGrab);
+        float pinchScore = grabAPI.GetHandPinchScore(GrabbingRule.DefaultPinchRule);
+
+        // TODO: Improve this!
+
+        HandState state;
+
+        if(grabScore > grabThreshold)
+        {
+            state = HandState.Grabbing;
+        }
+        else if(pinchScore == 1 && grabScore < 0.1f)
+        {
+            // while doing a full hand grab, pinch score will usually reach 1 before our grab score reaches its own threshhold 
+            // count it as a pinch only if grab score is still close to zero
+            state = HandState.Pinching;
+               
+        }else if(pinchScore > pointThreshold && grabScore == 0)
+        {
+            state = HandState.Pointing;
+        }
+        else
+        {
+            state = HandState.Open;
+        }
+
+
+        if(debugMode)
+        {
+            debugText[0].text = "G: " + grabScore.ToString("0.00");
+            debugText[1].text = "P: " + pinchScore.ToString("0.00");
+            debugText[2].text = Enum.GetName(typeof(HandState), state);
+        }
+
+        return state;
+        
+    }
+
+
+
 
 
     // selects the best suitable target window based on hand projection
     InteractableWindow GetTargetWindow(RaycastHit[] hits, float projectionStrength)
     {
 
-        // find the window along the ray that is closest to the projection target point and within minimum distance of the projected position
+        // find the window along the ray that is closest to the projection target point and within maximum distance of the projected position
         InteractableWindow bestCandidate = null;
         float closestDistance = Mathf.Infinity;
         foreach (RaycastHit hit in hits)
@@ -149,69 +276,103 @@ public class ProjectedHand : MonoBehaviour
             }
         }
 
-        if (bestCandidate != null) bestCandidate.Targeted = true;
-
         return bestCandidate;
     }
 
-    void FadeWindows(RaycastHit[] hits)
-    {
 
-        float targetDistance = 0;
+
+
+    // Fades or Hides all windows in front of the target window, depending on hand state
+    // it's a shame the returned raycast hits are not sorted, because otherwise this could have been a LOT neater
+    void FadeWindows(RaycastHit[] hits, HandState handState)
+    {
 
         // get distance to selected window
         if(hoverTarget == null)
         {
-            // if there is no current hover target, use projected hand position (held windows are always hover targets as well)
-            targetDistance = projectedPosition.position.magnitude;
+            // if there is no current hover target, use projected hand position
+            targetDistance = projectedPosition.localPosition.magnitude;
         }
         else
         {
-            // find distance to the current hover target
-            foreach(RaycastHit hit in hits)
+            // find distance to the current hover target (held windows are always hover targets as well)
+            foreach (RaycastHit hit in hits)
             {
                 InteractableWindow hitWindow = hit.collider.GetComponent<InteractableWindow>();
                 if (hitWindow == hoverTarget)
                 {
-                    // distance = magnitude of position in local space
+                    // distance = magnitude of position in local space 
                     targetDistance = transform.InverseTransformPoint(hit.point).magnitude;
                 }
             }
+
+            // notably, if this did not update targetDistance (because the hoverTarget was not any of the raycast hits), the previously known distance is still used
+            // this can happen if the pointer moves off the target window during a pinch, because targets will not be updated during an interaction (and thus hoverTarget != null)
+            // this ensures any windows closer than the current target are still hidden for the duration of an interaction, even if we move off the target window during that time
         }
 
         // fade all windows that are closer than that distance
-        foreach(RaycastHit hit in hits)
+        foreach (RaycastHit hit in hits)
         {
             InteractableWindow hitWindow = hit.collider.GetComponent<InteractableWindow>();
             float hitDistance = transform.InverseTransformPoint(hit.point).magnitude;
 
             if (hitDistance < targetDistance)
             {
-                hitWindow.Faded = true;
+                // when pinching (interacting within a window) completely hide windows in front, otherwise fade them
+                if (hoverTarget != null && (int) handState > 1)
+                {
+                    hitWindow.Hidden = true;
+                }
+                else
+                {
+                    hitWindow.Faded = true;
+                }
             }
         }
+
     }
 
-    public void DrawDebugLines()
+
+
+    // (de)activate the ray interaction
+    void ToggleRayInteraction(bool enabled)
     {
-        if (grabAPI.IsHandPalmGrabbing(GrabbingRule.DefaultPalmRule))
+
+        // we cannot simply disable the entire game object since we still need the pointerPose script to be active
+        rayInteractor.enabled = enabled;
+        rayInteractorVisuals.gameObject.SetActive(enabled);
+        
+    }
+
+
+
+    // release any held window
+    void ReleaseWindow()
+    {
+        if (heldWindow != null)
         {
-            debugLines[0].startColor = new Color(0, 1, 0, 0);
-            debugLines[0].endColor = Color.green;
+            heldWindow.Release();
+            heldWindow = null;
         }
-        else if(grabAPI.IsHandPinchGrabbing(GrabbingRule.DefaultPinchRule))
+    }
+
+
+
+
+    void ToggleDebugDisplay(bool enabled)
+    {
+        foreach(TextMeshPro text in debugText)
         {
-            debugLines[0].startColor = new Color(1, 1, 0, 0);
-            debugLines[0].endColor = Color.yellow;
-        }
-        else
-        {
-            debugLines[0].startColor = new Color(1, 0, 0, 0);
-            debugLines[0].endColor = Color.red;
+            text.enabled = enabled;
         }
 
-        debugLines[0].SetPositions(new Vector3[] { Vector3.zero, projectedPosition.localPosition });
-        debugLines[1].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformDirection(pointerPose.forward * projectionRange) });
+        foreach (LineRenderer line in debugLines)
+        {
+            line.enabled = enabled;
+        }
     }
+
+
 
 }
