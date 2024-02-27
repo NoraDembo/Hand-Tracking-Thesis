@@ -304,30 +304,57 @@ public class ProjectedHand : MonoBehaviour
 
             if (handState == HandState.Open)
             {
+                // "forget" previously known target distance since we are looking for new targets
+                targetDistance = 0;
 
                 // If the hand is open find the window along the ray that is closest to the projection target point and within maximum distance of the projected position
                 float closestDistance = Mathf.Infinity;
                 foreach (RaycastHit hit in hits)
                 {
-                    float distance = (hit.point - projectedPosition.position).magnitude;
+                    // distance from origin to projected position
+                    float projectionDistance = projectedPosition.localPosition.magnitude;
+                    // distance from origin to window hit
+                    float hitDistance = transform.InverseTransformPoint(hit.point).magnitude;
+                    // distance between hit position and projectedPosition (doing it this way instead of calculating the raw distance between points allows for negative values)
+                    float hitDifference = hitDistance - projectionDistance;
+                    float absDistance = Mathf.Abs(hitDifference);
+
                     // if this target is within distance of the projected position (scaled by projection strength) and closer to it than our previous best candidate, choose it
-                    if (distance < maxSelectionDistance * projectionStrength && distance < closestDistance)
+                    // if the projected position is behind a window, selectionDistance will be negative, i. e. windows in front of the projected position are always "in range" and reaching TOO far through a window is impossible
+                    if (hitDifference < maxSelectionDistance * projectionStrength && absDistance < closestDistance)
                     {
                         bestCandidate = hit.collider.GetComponent<InteractableWindow>();
-                        closestDistance = distance;
+                        targetDistance = transform.InverseTransformPoint(hit.point).magnitude;
+                        closestDistance = absDistance;
                     }
                 }
 
             }
             else
             {
-                // for all other hand states, keep the previous target window
+                // for all other hand states, keep the previous hover target and only find its distance from the raycast origin (used for fading of foreground windows)
                 bestCandidate = hoverTarget;
+
+                foreach (RaycastHit hit in hits)
+                {
+                    InteractableWindow hitWindow = hit.collider.GetComponent<InteractableWindow>();
+                    if(hitWindow == hoverTarget)
+                    {
+                        targetDistance = transform.InverseTransformPoint(hit.point).magnitude;
+                        break;
+                    }
+                    
+                }
+
+                // notably, if this did not update targetDistance (because the hoverTarget was not any of the raycast hits), the previously known distance is still used
+                // this can happen if the pointer moves off the target window during a pinch interaction, because the target will not be updated but the raycast may still hit other windows
+                // this ensures any windows closer than the current target are still hidden for the duration of an interaction, even if we move off the target window during that time
+
             }
 
 
             // fade untargeted windows in front of the target
-            FadeWindows(hits, bestCandidate);
+            FadeWindows(hits);
 
             return bestCandidate;
         }
@@ -336,36 +363,11 @@ public class ProjectedHand : MonoBehaviour
 
 
 
-    // Fades or Hides all windows in front of the specified window, depending on hand state
-    // it's a shame the returned raycast hits are not sorted, because otherwise this could have been a LOT neater
-    void FadeWindows(RaycastHit[] hits, InteractableWindow targetWindow)
+    // Fades or Hides all windows closer than the last known target distance, depending on hand state
+    void FadeWindows(RaycastHit[] hits)
     {
 
-        // get distance to selected window
-        if(targetWindow == null)
-        {
-            // if there is no target, use projected hand position
-            targetDistance = projectedPosition.localPosition.magnitude;
-        }
-        else
-        {
-            // find distance to the target
-            foreach (RaycastHit hit in hits)
-            {
-                InteractableWindow hitWindow = hit.collider.GetComponent<InteractableWindow>();
-                if (hitWindow == targetWindow)
-                {
-                    // distance = magnitude of position in local space 
-                    targetDistance = transform.InverseTransformPoint(hit.point).magnitude;
-                }
-            }
-
-            // notably, if this did not update targetDistance (because the hoverTarget was not any of the raycast hits), the previously known distance is still used
-            // this can happen if the pointer moves off the target window during a pinch, because targets will not be updated during an interaction (and thus hoverTarget != null)
-            // this ensures any windows closer than the current target are still hidden for the duration of an interaction, even if we move off the target window during that time
-        }
-
-        // fade all windows that are closer than that distance
+        // fade all windows that are closer than the target window's distance
         foreach (RaycastHit hit in hits)
         {
             InteractableWindow hitWindow = hit.collider.GetComponent<InteractableWindow>();
