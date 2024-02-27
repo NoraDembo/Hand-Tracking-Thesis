@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6731272656059849281}
   - component: {fileID: 4116783759305691303}
   - component: {fileID: 8764201028656136769}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: HandState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9162037651530109900}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: ProjectedPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 481179850161456781}
   - component: {fileID: 7633252692591785944}
   - component: {fileID: 8903109345163117653}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PinchScore
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -383,7 +383,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5612107806039049192}
   - component: {fileID: 8723464829320736384}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: DebugLine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -519,7 +519,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7866460850051669435}
   - component: {fileID: 5486469185574936138}
-  m_Layer: 0
+  - component: {fileID: 8144802735163685818}
+  m_Layer: 6
   m_Name: ProjectedHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -573,6 +574,27 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 32
   projectedPosition: {fileID: 9162037651530109900}
+--- !u!135 &8144802735163685818
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4161714279420927444}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5441477718639269775
 GameObject:
   m_ObjectHideFlags: 0
@@ -583,7 +605,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1157241036881604597}
   - component: {fileID: 1234978826909885751}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: DebugLine (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -720,7 +742,7 @@ GameObject:
   - component: {fileID: 2690179106603895606}
   - component: {fileID: 7216006613423142541}
   - component: {fileID: 7481284205360840623}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GrabScore
   m_TagString: Untagged
   m_Icon: {fileID: 0}
