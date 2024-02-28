@@ -16,10 +16,10 @@ public class ProjectedHand : MonoBehaviour
         Pinching    // Hand does a closed pinch (interact within windows)
     }
 
-    
+
 
     [Tooltip("Display visualizations of rays and target collider")]
-    [SerializeField] bool debugMode = false;
+    public static bool debugMode { get; set; }
 
     [Tooltip("Distance (from body to hand) at which hand position starts to be projected outwards")]
     [SerializeField] float minGrabDistance = 0.25f;
