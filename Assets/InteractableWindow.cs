@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class InteractableWindow : MonoBehaviour
 {
-    // how many hands are targeting this
+    
     public bool Targeted { get; set; }
     public bool Faded { get; set; }
     public bool Hidden { get; set; }
@@ -14,7 +14,13 @@ public class InteractableWindow : MonoBehaviour
     CanvasGroup canvasGroup;
     RayInteractable rayInteractable;
     PointableCanvas pointableCanvas;
+    Transform centerEyeAnchor;
 
+    Vector3 previousGrabPosition = Vector3.zero;
+    Transform grabTransform;
+    [Tooltip("Distance the grabbing point needs to move before the window will follow it 1-1.")]
+    [SerializeField] static float followThreshold = 1f;
+    float accumulatedDistance = 0;
     bool grabbed = false;
 
     // Start is called before the first frame update
@@ -24,6 +30,7 @@ public class InteractableWindow : MonoBehaviour
         canvasGroup = GetComponentInChildren<CanvasGroup>();
         rayInteractable = GetComponentInChildren<RayInteractable>();
         pointableCanvas = GetComponentInChildren<PointableCanvas>();
+        centerEyeAnchor = GameObject.Find("CenterEyeAnchor").transform;
     }
 
     // LateUpdate so the hand interactors are done calculating their targets
@@ -45,31 +52,38 @@ public class InteractableWindow : MonoBehaviour
         Targeted = false;
         Faded = false;
         Hidden = false;
+
+        if(grabbed) FollowGrabPosition();
     }
 
-    public void Hold(Transform grabbingPoint)
+    public void Grab(Transform grabPoint)
     {
-        if (!grabbed)
-        {
-            // this is a new grab
 
-            // set parent and lock to its position and rotation
-            transform.SetParent(grabbingPoint);
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-            grabbed = true;
-        }
-        else
-        {
-            // this is a continued hold
-        }
+        grabTransform = grabPoint;
+        previousGrabPosition = grabTransform.position;
+        grabbed = true;
 
+    }
+
+    void FollowGrabPosition()
+    {
+
+        // follow the grab point based on movement
+        float frameDistance = (grabTransform.position - previousGrabPosition).magnitude;
+        accumulatedDistance += frameDistance;
+        transform.position = Vector3.Lerp(transform.position, grabTransform.position, accumulatedDistance / followThreshold);
+
+        // rotate towards users face, also based on traveled distance
+        Quaternion lookRotation = Quaternion.LookRotation(transform.position - centerEyeAnchor.position);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, accumulatedDistance / followThreshold);
+
+        previousGrabPosition = grabTransform.position;
     }
 
     public void Release()
     {
-        transform.parent = null;
         grabbed = false;
+        accumulatedDistance = 0;
     }
 
 }

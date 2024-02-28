@@ -148,21 +148,19 @@ public class ProjectedHand : MonoBehaviour
 
             case HandState.Grabbing:
 
-                // if there is a Hover Target, pick it up
+                // if there is a Hover Target and we are not yet holding anything else, pick it up
                 // notably, this state does not look for new targets, so we won't accidentally pick things up when passing through them with a closed hand
-                if(hoverTarget != null)
+                if(hoverTarget != null && heldWindow == null)
                 {
+                    heldWindow = hoverTarget;
+                    // if the target is in touch range, attatch to hand, otherwise attach to projected position
                     if (hoverTarget == touchedWindow)
                     {
-                        // if we are in direct touch range of a window, attatch it to the hand (i. e. this)
-                        heldWindow = touchedWindow;
-                        heldWindow.Hold(this.transform);
+                        heldWindow.Grab(transform);
                     }
                     else
                     {
-                        // otherwise attatch it to the projected hand position
-                        heldWindow = hoverTarget;
-                        heldWindow.Hold(projectedPosition);
+                        heldWindow.Grab(projectedPosition);
                     }
                 }
                 break;
@@ -179,7 +177,7 @@ public class ProjectedHand : MonoBehaviour
                 // nothing to do?
                 // we should always pass through the "pointing" state before we get here, so the RayInteractor should already be enabled.
                 // not enabling it here again may prevent accidental shifts from grabbing directly to pinching
-                // we shouldn't be looking for new target windows either, to prevent switching windows during an interaction
+
                 break;
 
         }     
@@ -283,9 +281,10 @@ public class ProjectedHand : MonoBehaviour
         
         if (touchedWindow != null)
         {
-            // if no window is being held, and the hand is open, select it as the new target
+            // if a window is in touch range, that window should be the target
             if (handState == HandState.Open)
             {
+                // if the hand is open, select it
                 return touchedWindow;
             }
             else
@@ -332,7 +331,7 @@ public class ProjectedHand : MonoBehaviour
             }
             else
             {
-                // for all other hand states, keep the previous hover target and only find its distance from the raycast origin (used for fading of foreground windows)
+                // for all other hand states, keep the previous hover target and use the raycast only to find its distance (used for fading of foreground windows)
                 bestCandidate = hoverTarget;
 
                 foreach (RaycastHit hit in hits)
