@@ -899,7 +899,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92153ef708a5f064aa7cd11cc7a53b8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugMode: 1
+  debugMode: 0
   minGrabDistance: 0.2
   maxGrabDistance: 0.7
   projectionRange: 3
@@ -922,8 +922,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grabAPI: {fileID: 0}
-  grabThreshold: 0
-  pointThreshold: 0
+  grabTime: 0.2
+  pinchingThreshold: 0.5
   indexRule:
     _thumbRequirement: 0
     _indexRequirement: 2
