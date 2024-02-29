@@ -1892,6 +1892,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ed141d747a9e094e93f1b65e704195a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  padding: 100
 --- !u!54 &5637522426259073845
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -5,21 +5,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System;
+using static GestureController;
 
 public class ProjectedHand : MonoBehaviour
 {
-    enum HandState
-    {
-        Open,       // Hand is completely open (target entire windows)
-        Grabbing,   // Hand does a closed grab (interact with entire windows)
-        Pointing,   // Hand is in preparing a pinch (target within windows)
-        Pinching    // Hand does a closed pinch (interact within windows)
-    }
 
-
-
-    [Tooltip("Display visualizations of rays and target collider")]
-    public static bool debugMode { get; set; }
+    [SerializeField] bool debugMode = true;
 
     [Tooltip("Distance (from body to hand) at which hand position starts to be projected outwards")]
     [SerializeField] float minGrabDistance = 0.25f;
@@ -30,12 +21,11 @@ public class ProjectedHand : MonoBehaviour
     [Tooltip("Maximum distance the pojected position can reach (if the physical hand is at maxGrabDistance, the projected position will be this much further)")]
     [SerializeField] float projectionRange = 5;
 
-    [Tooltip("The minimum distance from the projected position where a window will be considered for targeting")]
+    [Tooltip("The maximum distance in front of the projected position where a window will be considered for targeting")]
     [SerializeField] float maxSelectionDistance = 1;
 
     [Tooltip("The RayInteractor used for 'pinch' interactions as well as for calculating direction")]
     [SerializeField] RayInteractor rayInteractor;
-
     // the PointerPose calculates the ray origin and direction for the interactor
     Transform pointerPose;
     Transform rayInteractorVisuals;
@@ -43,24 +33,13 @@ public class ProjectedHand : MonoBehaviour
     [Tooltip("Maximum interpolation weights for each xyz component beween eye direction vector and Meta interaction ray")]
     [SerializeField] Vector3 maxInterpolation = Vector3.zero;
 
-    [Tooltip("GrabScore to consider the hand grabbing")]
-    [SerializeField] float grabThreshold;
-
-    [Tooltip("PinchScore to consider the hand pointing")]
-    [SerializeField] float pointThreshold;
-
-    
-
-    [Tooltip("Hand grab API to determine hand states.")]
-    [SerializeField] HandGrabAPI grabAPI;
-
     [Tooltip("The layer mask used for ray collisions")]
     [SerializeField] LayerMask layerMask;
 
-    HandState handState = HandState.Open;
-
     // the target position of the hand projection
-    [SerializeField] Transform projectedPosition;
+    Transform projectedPosition;
+
+    GestureController gestureController;
 
     // the windows that are targeted or held by this projected hand or are in touch range
     InteractableWindow hoverTarget;
@@ -71,10 +50,8 @@ public class ProjectedHand : MonoBehaviour
     float targetDistance = 0;
 
     // for visualization of rays and hand states
-    LineRenderer[] debugLines;
-    TextMeshPro[] debugText;
-
-    
+    LineRenderer debugLine;
+    Transform debugDisplay;
 
 
     // Start is called before the first frame update
@@ -84,10 +61,18 @@ public class ProjectedHand : MonoBehaviour
         pointerPose = rayInteractor.GetComponentInChildren<HandPointerPose>().transform;
         rayInteractorVisuals = rayInteractor.transform.GetChild(2);
 
-        // get reference to debug displays
-        debugLines = GetComponentsInChildren<LineRenderer>();
-        debugText = GetComponentsInChildren<TextMeshPro>();
+        // get reference to gesture controller
+        gestureController = GetComponent<GestureController>();
 
+        // get reference to projected position transform
+        projectedPosition = transform.GetChild(0);
+
+        // get references to debug displays
+        debugLine = GetComponentInChildren<LineRenderer>();
+        debugDisplay = transform.GetChild(1);
+
+        //show (or hide) debug displays
+        ToggleDebugDisplay(debugMode);
     }
 
 
@@ -117,8 +102,6 @@ public class ProjectedHand : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //show (or hide) debug displays
-        ToggleDebugDisplay(debugMode);
 
         // follow the position of the RayInteractor origin
         transform.position = pointerPose.position;
@@ -127,10 +110,10 @@ public class ProjectedHand : MonoBehaviour
         float projectionStrength = ProjectHand();
 
         // Get Hand state (Open, Grabbing, Pointing or Pinching)
-        handState = GetHandState();
+        HandState handState = gestureController.GetHandState();
 
         // get target window
-        hoverTarget = GetTargetWindow(projectionStrength);
+        hoverTarget = GetTargetWindow(projectionStrength, handState);
 
         switch (handState)
         {
@@ -165,18 +148,10 @@ public class ProjectedHand : MonoBehaviour
                 }
                 break;
 
-            case HandState.Pointing:
+            case HandState.Pinching:
 
                 // enable ray interaction
                 ToggleRayInteraction(true);
-
-                break;
-
-            case HandState.Pinching:
-                
-                // nothing to do?
-                // we should always pass through the "pointing" state before we get here, so the RayInteractor should already be enabled.
-                // not enabling it here again may prevent accidental shifts from grabbing directly to pinching
 
                 break;
 
@@ -213,69 +188,17 @@ public class ProjectedHand : MonoBehaviour
         // update projected hand position
         projectedPosition.localPosition = Vector3.forward * projectionRange * quadraticProjectionFactor;
 
-        // Update Ray visualizations
-        if (debugMode)
-        {
-            debugLines[0].SetPositions(new Vector3[] { Vector3.zero, projectedPosition.localPosition });
-            //debugLines[1].SetPositions(new Vector3[] { Vector3.zero, transform.InverseTransformDirection(pointerPose.forward * projectionRange) });
-        }
 
+        // Update Ray visualization
+        debugLine.SetPositions(new Vector3[] { Vector3.zero, projectedPosition.localPosition });
 
         // return current projection strength
         return quadraticProjectionFactor;
     }
 
 
-
-
-
-    HandState GetHandState()
-    {
-
-        float grabScore = grabAPI.GetHandPalmScore(GrabbingRule.FullGrab);
-        float pinchScore = grabAPI.GetHandPinchScore(GrabbingRule.DefaultPinchRule);
-
-        // TODO: Improve this!
-
-        HandState state;
-
-        if(grabScore > grabThreshold)
-        {
-            state = HandState.Grabbing;
-        }
-        else if(pinchScore == 1 && grabScore < 0.1f)
-        {
-            // while doing a full hand grab, pinch score will usually reach 1 before our grab score reaches its own threshhold 
-            // count it as a pinch only if grab score is still close to zero
-            state = HandState.Pinching;
-               
-        }else if(pinchScore > pointThreshold && grabScore == 0)
-        {
-            state = HandState.Pointing;
-        }
-        else
-        {
-            state = HandState.Open;
-        }
-
-
-        if(debugMode)
-        {
-            debugText[0].text = "G: " + grabScore.ToString("0.00");
-            debugText[1].text = "P: " + pinchScore.ToString("0.00");
-            debugText[2].text = Enum.GetName(typeof(HandState), state);
-        }
-
-        return state;
-        
-    }
-
-
-
-
-
     // selects the best suitable target window based on hand projection
-    InteractableWindow GetTargetWindow(float projectionStrength)
+    InteractableWindow GetTargetWindow(float projectionStrength, HandState handState)
     {
 
         
@@ -353,7 +276,7 @@ public class ProjectedHand : MonoBehaviour
 
 
             // fade untargeted windows in front of the target
-            FadeWindows(hits);
+            FadeWindows(hits, handState);
 
             return bestCandidate;
         }
@@ -363,7 +286,7 @@ public class ProjectedHand : MonoBehaviour
 
 
     // Fades or Hides all windows closer than the last known target distance, depending on hand state
-    void FadeWindows(RaycastHit[] hits)
+    void FadeWindows(RaycastHit[] hits, HandState handState)
     {
 
         // fade all windows that are closer than the target window's distance
@@ -415,17 +338,9 @@ public class ProjectedHand : MonoBehaviour
 
 
 
-    void ToggleDebugDisplay(bool enabled)
+    public void ToggleDebugDisplay(bool enabled)
     {
-        foreach(TextMeshPro text in debugText)
-        {
-            text.enabled = enabled;
-        }
-
-        foreach (LineRenderer line in debugLines)
-        {
-            line.enabled = enabled;
-        }
+        debugDisplay.gameObject.SetActive(enabled);
     }
 
 

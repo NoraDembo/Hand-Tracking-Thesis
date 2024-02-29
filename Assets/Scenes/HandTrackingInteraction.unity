@@ -1041,6 +1041,10 @@ PrefabInstance:
       propertyPath: rayInteractor
       value: 
       objectReference: {fileID: 669137101}
+    - target: {fileID: 5949539131954008637, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      propertyPath: grabAPI
+      value: 
+      objectReference: {fileID: 951375740}
     - target: {fileID: 7344051333785909387, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -1061,13 +1065,25 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 176970467502103548, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
     - targetCorrespondingSourceObject: {fileID: 9150948874353842257, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 1487058621685140088, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 1494544317601645356, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 6686095013553852637, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
     - targetCorrespondingSourceObject: {fileID: 3440730722744531911, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 176970467502103548, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8840451636452280136, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
@@ -1677,25 +1693,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 212779994}
     m_Modifications:
-    - target: {fileID: 481179850161456781, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
-      propertyPath: m_Pivot.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 481179850161456781, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -0.02
-      objectReference: {fileID: 0}
     - target: {fileID: 2565044942373405928, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2690179106603895606, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
-      propertyPath: m_Pivot.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2690179106603895606, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -0.02
       objectReference: {fileID: 0}
     - target: {fileID: 2847634239876781423, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       propertyPath: m_Pivot.x
@@ -1737,6 +1737,14 @@ PrefabInstance:
       propertyPath: handEyeInterpolation
       value: 0.6
       objectReference: {fileID: 0}
+    - target: {fileID: 5949539131954008637, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      propertyPath: grabAPI
+      value: 
+      objectReference: {fileID: 1784031178}
+    - target: {fileID: 7323507968359062504, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -0.07
+      objectReference: {fileID: 0}
     - target: {fileID: 7344051333785909387, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -1765,13 +1773,25 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 176970467502103548, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
     - targetCorrespondingSourceObject: {fileID: 9150948874353842257, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 1487058621685140088, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 1494544317601645356, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 6686095013553852637, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
     - targetCorrespondingSourceObject: {fileID: 3440730722744531911, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 176970467502103548, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8840451636452280136, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: b1d3749b27a14ee4cb03cac279f4a9e0, type: 3}

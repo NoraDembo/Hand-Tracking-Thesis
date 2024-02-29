@@ -6,6 +6,8 @@ using UnityEngine;
 public class ColliderResizer : MonoBehaviour
 {
 
+    public float padding = 0;
+
     BoundsClipper surfaceBounds;
     BoxCollider collisionBox;
     RectTransform canvasRect;
@@ -22,7 +24,7 @@ public class ColliderResizer : MonoBehaviour
     void Update()
     {
         // resize collider according to canvas size
-        Vector3 boundingBoxSize = new Vector3(canvasRect.sizeDelta.x * canvasRect.localScale.x, canvasRect.sizeDelta.y * canvasRect.localScale.y, 1 * canvasRect.localScale.z);
+        Vector3 boundingBoxSize = new Vector3((canvasRect.sizeDelta.x + padding) * canvasRect.localScale.x, (canvasRect.sizeDelta.y + padding) * canvasRect.localScale.y, 1 * canvasRect.localScale.z);
         surfaceBounds.Size = boundingBoxSize;
         collisionBox.size = boundingBoxSize;
     }

@@ -1002,8 +1002,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a87564d1c78344c428ee5e307b0d984f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stickyThreshold: 0.1
-  followThreshold: 0.5
 --- !u!95 &4522872420595437176
 Animator:
   serializedVersion: 5
@@ -1058,6 +1056,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ed141d747a9e094e93f1b65e704195a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  padding: 100
 --- !u!54 &6497182001535874559
 Rigidbody:
   m_ObjectHideFlags: 0
