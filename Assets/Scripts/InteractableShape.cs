@@ -24,7 +24,6 @@ public class InteractableShape : MonoBehaviour
     public void SetHover(bool hovering)
     {
         animator.SetBool("Hover", hovering);
-
     }
 
     public void SetClick(bool clicking)
