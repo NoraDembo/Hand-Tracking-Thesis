@@ -13,7 +13,8 @@ public class GestureController : MonoBehaviour
     {
         Open,       // Hand is completely open (target entire windows)
         Grabbing,   // Hand does a closed grab (interact with entire windows)
-        Pinching    // Hand does a closed pinch (interact within windows)
+        Pointing,   // Hand is partially close (target inside of windows)
+        Pinching    // Hand is pinching (interact inside of windows)
     }
 
     [SerializeField] HandGrabAPI grabAPI;
@@ -58,63 +59,84 @@ public class GestureController : MonoBehaviour
         switch (previousState)
         {
             case HandState.Open:
+            case HandState.Pointing:
 
-                // if the index finger is "grabbing", enter the hand grabbing state
-                // (basing this on the index finger only has proven to trigger very consistently when making a full fist, while not causing accidental acitvations for partially closed hands)
                 if (grabAPI.IsHandPalmGrabbing(indexRule))
                 {
+                    // if the index finger is "grabbing", enter the hand grabbing state
+                    // (basing this on the index finger only has proven to trigger very consistently when making a full fist, while not causing accidental acitvations for partially closed hands)
                     newState = HandState.Grabbing;
                 }
-                else if (fingersScore > pinchingThreshold || pinchScore > 0)
+                else if (grabAPI.IsHandPinchGrabbing(pinchRule))
                 {
-                    // if the hand is partially closed and it has been this way for longer than the grabTimer, enter pointing state
-                    // this prevents accidental clicks when a "pinching" position is reached while going for a full grab, since the ray interactor will only be enabled once a pointing state is registered
-                    if(grabTimer > grabTime)
+                    if (grabTimer > grabTime)
                     {
+                        // if the grab condition was not satisfied as well before the timer ran out, enter pinching state
                         newState = HandState.Pinching;
                     }
                     else
                     {
-                        // else remain in open state and increment grab timer
+                        // else remain in this state and increment grab timer
                         grabTimer += Time.deltaTime;
                     }
                 }
                 else
                 {
-                    // if the hand is fully open, remain in open state and reset grab timer
+                    // if the hand is neither grabbing nor pinching, reset grab timer
                     grabTimer = 0;
+
+                    if (grabAPI.IsHandPalmGrabbing(fingersRule) || pinchScore > pinchingThreshold)
+                    {
+                        // if the hand is partially closed, enter pointing state
+                        newState = HandState.Pointing;
+                    }
+                    else
+                    {
+                        // else enter open state
+                        newState = HandState.Open;
+                    }
                 }
                 break;
 
             case HandState.Grabbing:
 
-                // only release the grabbing state if ALL fingers are released
-                if (!grabAPI.IsHandPalmGrabbing(fingersRule)){
+                // release grabbing state when index finger is performing neither a grab nor a pinch
+                // pinch state will always be active during a grab as well, while the index palm grab has proven to be a bit finnicky depending on hand rotation (probably due to camera view angle of the tracking cameras)
+                // making the release depend on a pinch release as well makes the grab state a lot more stable
+                if (!grabAPI.IsHandPalmGrabbing(indexRule) && !grabAPI.IsHandPinchGrabbing(pinchRule)){
                     grabTimer = 0;
                     newState = HandState.Open;
                 }
                 break;
 
-            case HandState.Pinching:
+            
 
-
-                if (grabAPI.IsHandPalmGrabbing(indexRule))
+                if (grabAPI.IsHandPinchGrabbing(pinchRule))
+                {
+                    // if the pinch is complete, go to pinching state
+                    newState = HandState.Pinching;
+                }
+                else if (grabAPI.IsHandPalmGrabbing(indexRule))
                 {
                     // if the hand is grabbing, go to grabbing state
                     newState = HandState.Grabbing;
                 }
-                else if (fingersScore < pinchingThreshold && pinchScore == 0)
+                else if (!grabAPI.IsHandPalmGrabbing(fingersRule) && pinchScore < pinchingThreshold)
                 {
                     // if fingers are fully open, go to open hand state
                     grabTimer = 0;
                     newState = HandState.Open;
-                }else if (grabAPI.IsHandPinchGrabbing(pinchRule))
-                {
-                    // if fingers are pinching, go to pinching state
-                    newState = HandState.Pinching;
                 }
 
-                // going from pointing to grabbing always requires opening the hand completely first to ensure it is a deliberate gesture
+                break;
+            case HandState.Pinching:
+
+
+                if (!grabAPI.IsHandPinchGrabbing(pinchRule))
+                {
+                    // if the hand is no longer pinching, go back to pointing state
+                    newState = HandState.Pointing;
+                }
 
                 break;
         }

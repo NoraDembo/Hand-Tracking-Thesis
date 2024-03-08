@@ -903,7 +903,7 @@ MonoBehaviour:
   minGrabDistance: 0.2
   maxGrabDistance: 0.7
   projectionRange: 3
-  maxSelectionDistance: 1
+  selectionRange: 1
   rayInteractor: {fileID: 0}
   maxInterpolation: {x: 1, y: 0.6, z: 0.6}
   layerMask:
@@ -923,7 +923,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grabAPI: {fileID: 0}
   grabTime: 0.2
-  pinchingThreshold: 0.5
+  pinchingThreshold: 0.3
   indexRule:
     _thumbRequirement: 0
     _indexRequirement: 2
