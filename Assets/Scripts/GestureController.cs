@@ -109,26 +109,6 @@ public class GestureController : MonoBehaviour
                 }
                 break;
 
-            
-
-                if (grabAPI.IsHandPinchGrabbing(pinchRule))
-                {
-                    // if the pinch is complete, go to pinching state
-                    newState = HandState.Pinching;
-                }
-                else if (grabAPI.IsHandPalmGrabbing(indexRule))
-                {
-                    // if the hand is grabbing, go to grabbing state
-                    newState = HandState.Grabbing;
-                }
-                else if (!grabAPI.IsHandPalmGrabbing(fingersRule) && pinchScore < pinchingThreshold)
-                {
-                    // if fingers are fully open, go to open hand state
-                    grabTimer = 0;
-                    newState = HandState.Open;
-                }
-
-                break;
             case HandState.Pinching:
 
 
